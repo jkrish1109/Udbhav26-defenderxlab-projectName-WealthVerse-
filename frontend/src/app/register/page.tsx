@@ -12,7 +12,7 @@ import { GraduationCap, Sprout, Briefcase, Building2, ArrowRight, User, Mail, Lo
 const universes = [
   {
     id: 'student',
-    title: 'Student Universe',
+    title: 'WealthVerse',
     description: 'Pocket money tracking, daily savings, and education goals.',
     icon: GraduationCap,
     color: 'emerald'
@@ -116,7 +116,7 @@ export default function Register() {
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#c6ff00] to-[#4d7cfe] flex items-center justify-center">
             <span className="text-black font-bold text-xl">W</span>
           </div>
-          <span className="text-3xl font-bold text-white">Student Universe</span>
+          <span className="text-3xl font-bold text-white">WealthVerse</span>
         </Link>
 
         <AnimatePresence mode="wait">

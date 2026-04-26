@@ -55,15 +55,18 @@ export default function ForgotPassword() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-slate-400 mb-2">Email Address</label>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                  <div className="relative flex items-center">
+                    <div className="absolute left-4 flex items-center justify-center w-5 h-5 pointer-events-none">
+                      <Mail className="text-slate-500" size={16} strokeWidth={1.5} />
+                    </div>
                     <input
                       type="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@example.com"
-                      className="premium-input w-full pl-12"
+                      className="premium-input w-full"
+                      style={{ paddingLeft: '2.75rem' }}
                     />
                   </div>
                 </div>

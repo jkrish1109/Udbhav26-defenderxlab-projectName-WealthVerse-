@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
 const planets = [
@@ -9,12 +9,30 @@ const planets = [
   { label: 'Budget',      emoji: '🧾', color: '#ec4899', orbitRadius: 245, speed: 38, size: 36, startAngle: 310 },
 ];
 
-const Particle = ({ x, y }: { x: number; y: number }) => (
+// Deterministic seed-based pseudo-random to avoid SSR hydration mismatch
+function seededRandom(seed: number) {
+  const x = Math.sin(seed * 9301 + 49297) * 233280;
+  return x - Math.floor(x);
+}
+
+const CANVAS = 560;
+const CENTER = CANVAS / 2;
+
+// Pre-computed deterministic particle positions
+const particles = Array.from({ length: 22 }, (_, i) => ({
+  x: seededRandom(i * 2 + 1) * CANVAS,
+  y: seededRandom(i * 2 + 2) * CANVAS,
+  duration: 2 + seededRandom(i * 3 + 10) * 2,
+  delay: seededRandom(i * 3 + 20) * 3,
+  id: i,
+}));
+
+const Particle = ({ x, y, duration, delay }: { x: number; y: number; duration: number; delay: number }) => (
   <motion.div
     className="absolute w-1 h-1 rounded-full bg-emerald-400/60"
     style={{ left: x, top: y }}
     animate={{ opacity: [0, 1, 0], scale: [0, 1.5, 0] }}
-    transition={{ duration: 2 + Math.random() * 2, repeat: Infinity, delay: Math.random() * 3 }}
+    transition={{ duration, repeat: Infinity, delay }}
   />
 );
 
@@ -81,15 +99,6 @@ const PlanetOrbit = ({ planet, center }: { planet: typeof planets[0]; center: nu
   );
 };
 
-const CANVAS = 560; // total width/height for the solar system area
-const CENTER = CANVAS / 2;
-
-const particles = Array.from({ length: 22 }, (_, i) => ({
-  x: Math.random() * CANVAS,
-  y: Math.random() * CANVAS,
-  id: i,
-}));
-
 const LoginIllustration = () => {
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden bg-slate-950 select-none">
@@ -100,7 +109,7 @@ const LoginIllustration = () => {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[35%] h-[35%] rounded-full bg-indigo-500/10 blur-[90px]" />
 
       {/* Floating star particles */}
-      {particles.map(p => <Particle key={p.id} x={p.x} y={p.y} />)}
+      {particles.map(p => <Particle key={p.id} x={p.x} y={p.y} duration={p.duration} delay={p.delay} />)}
 
       {/* Solar System Canvas */}
       <div

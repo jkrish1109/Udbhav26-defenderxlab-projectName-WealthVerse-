@@ -210,39 +210,48 @@ export default function Register() {
                     </div>
                   )}
 
-                  <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                  <div className="relative flex items-center">
+                    <div className="absolute left-4 flex items-center justify-center w-5 h-5 pointer-events-none">
+                      <User className="text-slate-500" size={16} strokeWidth={1.5} />
+                    </div>
                     <input
                       type="text"
                       required
                       value={formData.fullName}
                       onChange={(e) => setFormData({...formData, fullName: e.target.value})}
                       placeholder="Full Name"
-                      className="premium-input w-full pl-12"
+                      className="premium-input w-full"
+                      style={{ paddingLeft: '2.75rem' }}
                     />
                   </div>
 
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                  <div className="relative flex items-center">
+                    <div className="absolute left-4 flex items-center justify-center w-5 h-5 pointer-events-none">
+                      <Mail className="text-slate-500" size={16} strokeWidth={1.5} />
+                    </div>
                     <input
                       type="email"
                       required
                       value={formData.email}
                       onChange={(e) => setFormData({...formData, email: e.target.value})}
                       placeholder="Email Address"
-                      className="premium-input w-full pl-12"
+                      className="premium-input w-full"
+                      style={{ paddingLeft: '2.75rem' }}
                     />
                   </div>
 
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                  <div className="relative flex items-center">
+                    <div className="absolute left-4 flex items-center justify-center w-5 h-5 pointer-events-none">
+                      <Lock className="text-slate-500" size={16} strokeWidth={1.5} />
+                    </div>
                     <input
                       type="password"
                       required
                       value={formData.password}
                       onChange={(e) => setFormData({...formData, password: e.target.value})}
                       placeholder="Password"
-                      className="premium-input w-full pl-12"
+                      className="premium-input w-full"
+                      style={{ paddingLeft: '2.75rem' }}
                     />
                   </div>
 

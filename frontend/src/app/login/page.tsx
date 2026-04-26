@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useDispatch, useSelector } from 'react-redux'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { loginSuccess } from '@/store/slices/authSlice'
 import { RootState } from '@/store/store'
 import Button from '../../components/common/Button'
-import { Mail, MessageSquare, ArrowRight, ShieldCheck, ChevronLeft } from 'lucide-react'
+import { Mail, ArrowRight, Lock, ShieldCheck } from 'lucide-react'
 import LoginIllustration from '../../components/auth/LoginIllustration'
 
 export default function Login() {
@@ -16,11 +16,11 @@ export default function Login() {
   const dispatch = useDispatch()
   const { isAuthenticated } = useSelector((state: RootState) => state.auth)
   
-  const [method, setMethod] = useState<'email' | 'whatsapp'>('email')
-  const [identifier, setIdentifier] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3001/api'
 
@@ -34,9 +34,22 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setSuccess('')
     
-    if (!identifier || !password) {
-      setError(`Please enter your ${method === 'email' ? 'email' : 'WhatsApp number'} and password`)
+    if (!email) {
+      setError('Please enter your email address')
+      return
+    }
+    
+    if (!password) {
+      setError('Please enter your password')
+      return
+    }
+
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address')
       return
     }
 
@@ -45,15 +58,14 @@ export default function Login() {
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email: identifier, 
-          password 
-        }),
+        body: JSON.stringify({ email, password }),
       })
       
       const data = await response.json()
       
       if (!response.ok) throw new Error(data.error || 'Login failed')
+
+      setSuccess('Login successful! Redirecting...')
 
       // Success - log in user
       dispatch(loginSuccess({
@@ -69,7 +81,11 @@ export default function Login() {
       router.push('/dashboard')
     } catch (err: any) {
       console.error('Login error details:', err)
-      setError(err.message || 'Login failed. Please check your credentials.')
+      if (err.message === 'Failed to fetch') {
+        setError('Unable to connect to the server. Please make sure the backend is running.')
+      } else {
+        setError(err.message || 'Login failed. Please check your credentials.')
+      }
     } finally {
       setIsLoading(false)
     }
@@ -120,29 +136,7 @@ export default function Login() {
                   </motion.span>
                 ))}
               </motion.h1>
-              <p className="text-slate-400">Enter your details to access your universe.</p>
-            </div>
-
-            {/* Method Switcher */}
-            <div className="flex p-1 bg-[#1c1c1c] rounded-xl mb-8 border border-white/5">
-              <button
-                onClick={() => setMethod('email')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${
-                  method === 'email' ? 'bg-[#121212] text-white shadow-lg' : 'text-slate-400 hover:text-slate-300'
-                }`}
-              >
-                <Mail size={16} />
-                Email
-              </button>
-              <button
-                onClick={() => setMethod('whatsapp')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${
-                  method === 'whatsapp' ? 'bg-[#121212] text-white shadow-lg' : 'text-slate-400 hover:text-slate-300'
-                }`}
-              >
-                <MessageSquare size={16} />
-                WhatsApp
-              </button>
+              <p className="text-slate-400">Enter your email and password to access your universe.</p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-6">
@@ -156,28 +150,50 @@ export default function Login() {
                 </motion.div>
               )}
 
+              {success && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="bg-green-500/10 border border-green-500/50 text-green-400 px-4 py-2 rounded-lg text-sm"
+                >
+                  {success}
+                </motion.div>
+              )}
+
               <div>
                 <label className="block text-sm font-medium text-slate-400 mb-2">
-                  {method === 'email' ? 'Email Address' : 'WhatsApp Number'}
+                  Email Address
                 </label>
-                <input
-                  type={method === 'email' ? 'email' : 'tel'}
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder={method === 'email' ? 'you@example.com' : '+1 234 567 890'}
-                  className="premium-input w-full"
-                />
+                <div className="relative flex items-center">
+                  <div className="absolute left-4 flex items-center justify-center w-5 h-5 pointer-events-none">
+                    <Mail className="text-slate-500" size={16} strokeWidth={1.5} />
+                  </div>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="premium-input w-full"
+                    style={{ paddingLeft: '2.75rem' }}
+                  />
+                </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-400 mb-2">Password</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="premium-input w-full"
-                />
+                <div className="relative flex items-center">
+                  <div className="absolute left-4 flex items-center justify-center w-5 h-5 pointer-events-none">
+                    <Lock className="text-slate-500" size={16} strokeWidth={1.5} />
+                  </div>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="premium-input w-full"
+                    style={{ paddingLeft: '2.75rem' }}
+                  />
+                </div>
               </div>
 
               <div className="flex items-center justify-between">
@@ -205,21 +221,15 @@ export default function Login() {
               </Button>
             </form>
 
-            <div className="mt-8 pt-8 border-t border-white/5 flex flex-col gap-4">
-              <div className="text-center text-slate-500 text-sm">Or continue with</div>
-              <div className="grid grid-cols-2 gap-4">
-                <button className="flex items-center justify-center gap-2 py-2 px-4 rounded-xl border border-white/5 bg-[#1c1c1c]/50 hover:bg-[#1c1c1c] transition-all text-slate-300 text-sm">
-                  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5" alt="Google" />
-                  Google
-                </button>
-                <button className="flex items-center justify-center gap-2 py-2 px-4 rounded-xl border border-white/5 bg-[#1c1c1c]/50 hover:bg-[#1c1c1c] transition-all text-slate-300 text-sm">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" className="w-5 h-5" alt="Facebook" />
-                  Facebook
-                </button>
+            {/* Security Note */}
+            <div className="mt-8 pt-8 border-t border-white/5">
+              <div className="flex items-center gap-3 text-slate-500 text-xs">
+                <ShieldCheck size={16} className="text-[#c6ff00]/60 shrink-0" />
+                <span>Your data is encrypted end-to-end with bank-grade security. We never share your credentials.</span>
               </div>
             </div>
 
-            <p className="mt-10 text-center text-sm text-slate-500">
+            <p className="mt-8 text-center text-sm text-slate-500">
               Don't have an account?{' '}
               <Link href="/register" className="text-[#c6ff00] hover:text-[#c6ff00]/80 font-medium">Join WealthVerse</Link>
             </p>
